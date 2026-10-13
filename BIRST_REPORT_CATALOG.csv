@@ -1,0 +1,9 @@
+page,section,report_or_kpi,business_question,visual_type,decision_use
+Executive,Display,Actual Revenue,Are we on plan?,KPI tile,Monitor revenue level
+Executive,Display,Revenue Variance %,How far from plan?,KPI tile,Prioritize review
+Executive,Display,Operating Profit Variance,Are profits ahead of plan?,KPI tile,Assess overall performance
+Executive,Display,Monthly Actual vs Budget Revenue,When did performance shift?,Line chart,Identify period to investigate
+Drivers,Diagnose,Operating Profit Variance by Department,Which team has the largest gap?,Sorted bar,Focus analysis
+Drivers,Diagnose,Expense Variance by Account,Which expense accounts need review?,Sorted bar,Investigate spend
+Drivers,Diagnose,Regional Performance,Which regions differ from plan?,Bar or table,Compare regions
+Action,Decide,Variance Action Register,Who will investigate and by when?,Table/workflow,Track accountability

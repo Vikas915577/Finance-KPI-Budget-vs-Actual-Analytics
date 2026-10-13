@@ -1,5 +1,5 @@
 region_id,region_name
-R-NORTH,North
-R-WEST,West
-R-SOUTH,South
-R-CENTRAL,Central
+R01,North
+R02,South
+R03,East
+R04,West

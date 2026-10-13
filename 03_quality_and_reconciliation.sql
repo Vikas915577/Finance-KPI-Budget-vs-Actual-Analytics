@@ -1,10 +1,9 @@
--- Basic checks before interpreting budget variance
--- 1) Check total fact row count and loaded month range
-SELECT COUNT(*) AS row_count, MIN(month_start) AS first_month, MAX(month_start) AS last_month FROM fact_finance_monthly;
--- 2) Validate one currency per report slice (starter file uses USD consistently)
-SELECT currency_code, COUNT(*) FROM fact_finance_monthly GROUP BY currency_code;
--- 3) Compare source amounts with aggregated output before publishing dashboard.
-SELECT a.account_type, SUM(f.actual_amount) AS actual, SUM(f.budget_amount) AS budget
-FROM fact_finance_monthly f JOIN dim_account a USING(account_id) GROUP BY a.account_type;
--- 4) Check for null or negative financial values
-SELECT * FROM fact_finance_monthly WHERE month_start IS NULL OR budget_amount IS NULL OR actual_amount IS NULL OR budget_amount<0 OR actual_amount<0;
+-- Referential-integrity checks (expected result: zero rows each).
+SELECT f.account_id FROM fact_finance_monthly f LEFT JOIN dim_account d USING(account_id) WHERE d.account_id IS NULL;
+SELECT f.department_id FROM fact_finance_monthly f LEFT JOIN dim_department d USING(department_id) WHERE d.department_id IS NULL;
+SELECT f.region_id FROM fact_finance_monthly f LEFT JOIN dim_region d USING(region_id) WHERE d.region_id IS NULL;
+
+-- Budget/actual variance convention used throughout this project:
+-- Revenue variance = actual revenue - budget revenue (positive usually favourable).
+-- Expense variance = actual expense - budget expense (positive usually unfavourable).
+-- Operating-profit variance = actual operating profit - budget operating profit.

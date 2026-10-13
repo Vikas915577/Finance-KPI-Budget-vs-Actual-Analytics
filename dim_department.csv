@@ -1,6 +1,6 @@
 department_id,department_name
-D-SALES,Sales
-D-OPS,Operations
-D-DIGITAL,Digital
-D-SERVICE,Customer Service
-D-CORP,Corporate
+D01,Sales
+D02,Marketing
+D03,Operations
+D04,Technology
+D05,Corporate

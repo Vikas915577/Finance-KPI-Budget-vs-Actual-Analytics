@@ -1,7 +1,1 @@
-SYNTHETIC DATA DEMO FINDINGS — not real company results
-
-- Actual revenue was $19,473,772 against a budget of $19,159,360; the revenue variance was $314,412 (1.64% of budget).
-- Actual operating profit was $5,856,832 against a budget of $5,737,290; operating-profit variance was $119,542.
-- Sales had the strongest operating-profit variance ($107,825) in this synthetic dataset.
-- Operations had the weakest operating-profit variance ($-71,007) in this synthetic dataset.
-- Salaries and Benefits had the largest positive expense variance (actual above budget) at $63,300; review this result before drawing operational conclusions.
+SYNTHETIC PORTFOLIO DATA — not actual company results.\nDISPLAY: Revenue was $38,969,927 against budget $38,486,356; variance $483,571 (1.26% of budget).\nDISPLAY: Operating profit was $9,835,584 against budget $10,172,600; variance $-337,016.\nDIAGNOSE: Sales had the strongest operating-profit variance ($171,395); Operations had the weakest ($-284,694).\nDIAGNOSE: Salaries & Benefits had the largest positive expense variance ($356,905); validate volume, price, timing, and coding before assigning cause.\nDECIDE: Assign the variance owner to validate the largest driver, agree a corrective action and due date, then monitor next month's actual-vs-budget result. This is a proposed workflow, not proof of causation.\n

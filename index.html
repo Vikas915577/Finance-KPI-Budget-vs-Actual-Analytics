@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#101b35">
+<meta name="description" content="Finance budget-vs-actual portfolio: display results, diagnose drivers and decide next actions using SQL, Python and an Infor Birst implementation blueprint.">
+<title>Finance Performance | Display · Diagnose · Decide</title>
+<style>
+:root{--navy:#101b35;--ink:#17243c;--muted:#65738b;--line:#e3e9f2;--bg:#f4f7fb;--blue:#285ee8;--bluep:#edf2ff;--green:#087b62;--greenp:#e5f7f1;--amber:#8c5b00;--amberp:#fff4db;--white:#fff}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.6 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}a{color:var(--blue);text-decoration:none}a:hover{text-decoration:underline}.wrap{width:min(1120px,calc(100% - 34px));margin:auto}
+header{background:var(--navy);color:white}.nav{min-height:66px;display:flex;justify-content:space-between;align-items:center;gap:16px}.brand{display:flex;align-items:center;gap:10px;color:white;font-weight:800}.logo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:#dce7ff;color:#214ac1;font-weight:900}nav{display:flex;gap:19px;flex-wrap:wrap}nav a{font-size:12px;color:#d9e3fa;font-weight:700}
+.hero{padding:42px 0 38px;color:white;background:linear-gradient(125deg,#101b35,#18356a 65%,#285ee8)}.eyebrow{color:#cad8ff;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:850;margin:0 0 12px}h1{font-size:clamp(31px,5vw,49px);line-height:1.1;letter-spacing:-.045em;margin:0;max-width:800px}.lead{max-width:750px;color:#e2eaff;font-size:16px;margin:15px 0 0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}.btn{display:inline-flex;padding:10px 15px;border-radius:10px;font-size:13px;font-weight:800}.primary{background:white;color:#142650}.outline{border:1px solid #8096c4;color:white}.disclosure{display:flex;gap:10px;background:#1a2c50;border:1px solid #526991;border-radius:12px;padding:12px 14px;margin-top:22px;color:#e3ebff;font-size:12px}.disclosure strong{color:white}
+main{padding:30px 0 52px}.section{margin-top:32px}.sectionhead{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:15px}h2{font-size:23px;letter-spacing:-.03em;line-height:1.2;margin:0}.muted{color:var(--muted);font-size:12px;margin:5px 0 0}.period{font-size:11px;font-weight:800;color:var(--muted);background:white;border:1px solid var(--line);padding:6px 10px;border-radius:30px;white-space:nowrap}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.card{background:white;border:1px solid var(--line);border-radius:15px;padding:17px;min-width:0;box-shadow:0 4px 16px #13284b08}.label{font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.05em}.value{font-size:clamp(24px,3vw,32px);font-weight:850;letter-spacing:-.04em;line-height:1.2;margin:10px 0 6px;overflow-wrap:anywhere}.small{font-size:11px;color:var(--muted)}.good{color:var(--green);font-weight:800}.blue{color:var(--blue);font-weight:800}
+.two{display:grid;grid-template-columns:1.35fr 1fr;gap:14px}.stack{display:grid;gap:14px}.chart h3{font-size:14px;margin:0 0 3px}.chart p{font-size:11px;color:var(--muted);margin:0 0 12px}.chart img{width:100%;height:auto;display:block;border-radius:8px}.chart a{display:block}
+.ddd{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.phase{border:1px solid var(--line);border-radius:15px;padding:17px;background:white}.phase .num{font-size:10px;letter-spacing:.1em;font-weight:900;color:var(--blue)}.phase h3{font-size:17px;margin:6px 0}.phase p,.phase li{font-size:12px;color:var(--muted)}.phase ul{padding-left:18px;margin:9px 0 0}.phase.display{border-top:4px solid #285ee8}.phase.diagnose{border-top:4px solid #d0921a}.phase.decide{border-top:4px solid #087b62}
+.insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.insight{background:white;border:1px solid var(--line);border-radius:14px;padding:16px}.tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);font-weight:900}.insight h3{font-size:15px;line-height:1.35;margin:7px 0}.insight p{font-size:12px;color:var(--muted);margin:0}.note{background:var(--amberp);border:1px solid #f0d79c;color:#704a00;border-radius:12px;padding:13px 15px;font-size:12px;margin-top:13px}
+.assets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.asset{background:white;border:1px solid var(--line);border-radius:13px;padding:14px;display:flex;gap:11px}.asseticon{flex:0 0 33px;height:33px;background:var(--bluep);border-radius:9px;display:grid;place-items:center;font-size:11px;font-weight:900;color:#214bc4}.asset h3{font-size:13px;margin:0 0 3px}.asset p{font-size:11px;color:var(--muted);margin:0 0 6px}.asset a{font-size:11px;font-weight:800}.pills{display:flex;flex-wrap:wrap;gap:7px}.pill{background:white;border:1px solid var(--line);border-radius:30px;padding:6px 10px;font-size:11px;font-weight:750;color:#41516b}
+footer{border-top:1px solid var(--line);padding:22px 0 30px;font-size:11px;color:var(--muted)}.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+@media(max-width:780px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.two{grid-template-columns:1fr}.ddd,.insights{grid-template-columns:1fr}.assets{grid-template-columns:repeat(2,minmax(0,1fr))}.hero{padding:34px 0}.section{margin-top:27px}}
+@media(max-width:520px){.wrap{width:calc(100% - 22px)}.nav{align-items:flex-start;flex-direction:column;padding:12px 0}.nav nav{gap:13px}.hero{padding:29px 0}.lead{font-size:14px}.sectionhead{align-items:flex-start;flex-direction:column}.period{white-space:normal}.grid{gap:8px}.card{padding:13px;border-radius:12px}.value{font-size:24px}.assets{grid-template-columns:1fr}.ddd,.insights{gap:9px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style></head><body>
+<header><div class="wrap nav"><a class="brand" href="#top"><span class="logo">F</span><span>Finance Performance</span></a><nav aria-label="Main navigation"><a href="#overview">Overview</a><a href="#ddd">DDD workflow</a><a href="#drivers">Drivers</a><a href="#deliverables">Project files</a></nav></div></header>
+<section class="hero" id="top"><div class="wrap"><p class="eyebrow">Business intelligence · Portfolio case study</p><h1>Finance KPI &amp; Budget vs Actual Analytics</h1><p class="lead">A decision-focused finance story: display performance against plan, diagnose the biggest variance drivers, and decide what to investigate next — with SQL, Python and an Infor Birst implementation blueprint.</p><div class="actions"><a class="btn primary" href="#ddd">Explore the DDD story ↓</a><a class="btn outline" href="https://github.com/Vikas915577/Finance-KPI-Budget-vs-Actual-Analytics" target="_blank" rel="noopener">Open GitHub repository ↗</a></div><div class="disclosure"><span>ⓘ</span><div><strong>Portfolio disclosure:</strong> All figures are synthetic examples. This site is a static portfolio dashboard, not a live Birst connection. The Birst guide is an implementation plan, not a claimed deployment.</div></div></div></section>
+<main class="wrap">
+<section class="section" id="overview"><div class="sectionhead"><div><h2>Executive snapshot</h2><p class="muted">The top-level question: are we on plan?</p></div><span class="period">Jan–Dec 2025 · Synthetic USD</span></div>
+<div class="grid">
+<article class="card"><div class="label">Actual revenue</div><div class="value" id="revActual">—</div><div class="small">Budget <span id="revBudget">—</span></div><div class="small good" id="revVariance">Loading data…</div></article>
+<article class="card"><div class="label">Operating profit</div><div class="value" id="profitActual">—</div><div class="small">Budget <span id="profitBudget">—</span></div><div class="small" id="profitVariance">—</div></article>
+<article class="card"><div class="label">Operating margin</div><div class="value" id="marginActual">—</div><div class="small">Budget margin <span id="marginBudget">—</span></div><div class="small" id="marginGap">—</div></article>
+<article class="card"><div class="label">Data coverage</div><div class="value">1,680</div><div class="small">Fact rows · 12 months</div><div class="small blue">4 regions · 5 departments · 7 accounts</div></article>
+</div></section>
+<section class="section" id="ddd"><div class="sectionhead"><div><h2>Display → Diagnose → Decide</h2><p class="muted">Every section serves a business question and a next step.</p></div></div>
+<div class="ddd">
+<article class="phase display"><div class="num">01 / DISPLAY</div><h3>What happened?</h3><p>Give the decision-maker the headline and its comparison, not a wall of unrelated numbers.</p><ul><li>Actual vs budget revenue</li><li>Operating profit and margin</li><li>Monthly trend and variance</li></ul></article>
+<article class="phase diagnose"><div class="num">02 / DIAGNOSE</div><h3>Where is the gap?</h3><p>Rank the areas that explain the size and direction of the variance.</p><ul><li>Department operating-profit variance</li><li>Expense-account overspend</li><li>Region and month drill-down</li></ul></article>
+<article class="phase decide"><div class="num">03 / DECIDE</div><h3>What happens next?</h3><p>Turn the signal into a controlled investigation; do not mistake correlation for root cause.</p><ul><li>Validate price, volume, mix, timing and coding</li><li>Assign an owner and due date</li><li>Check the next reporting period</li></ul></article>
+</div></section>
+<section class="section" id="drivers"><div class="sectionhead"><div><h2>Performance and variance drivers</h2><p class="muted">Charts generated by the reproducible Python pipeline.</p></div></div>
+<div class="two"><article class="card chart"><h3>Display · Monthly revenue vs budget</h3><p>Where does the revenue trend diverge from plan?</p><a href="./outputs/charts/01_monthly_revenue_actual_vs_budget.png" target="_blank"><img src="./outputs/charts/01_monthly_revenue_actual_vs_budget.png" alt="Monthly actual revenue compared with budget" loading="lazy"></a></article><div class="stack">
+<article class="card chart"><h3>Diagnose · Operating profit by department</h3><p>Which department has the largest gap?</p><a href="./outputs/charts/02_operating_profit_variance_by_department.png" target="_blank"><img src="./outputs/charts/02_operating_profit_variance_by_department.png" alt="Operating profit variance by department" loading="lazy"></a></article>
+<article class="card chart"><h3>Diagnose · Expense variance by account</h3><p>Positive expense variance means overspend.</p><a href="./outputs/charts/03_expense_variance_by_account.png" target="_blank"><img src="./outputs/charts/03_expense_variance_by_account.png" alt="Expense variance by account" loading="lazy"></a></article>
+</div></div>
+<div class="section" style="margin-top:13px"><article class="card chart"><h3>Diagnose · Revenue vs operating margin</h3><p>Monthly relationship; this does not by itself prove a cause.</p><a href="./outputs/charts/04_revenue_vs_operating_margin.png" target="_blank"><img src="./outputs/charts/04_revenue_vs_operating_margin.png" alt="Revenue and operating margin relationship" loading="lazy"></a></article></div>
+<div class="section"><div class="sectionhead"><div><h2>What the sample data suggests</h2><p class="muted">Observations are data-derived; actions are hypotheses to validate.</p></div></div><div class="insights">
+<article class="insight"><div class="tag">Display</div><h3 id="findingRevenue">Revenue vs budget</h3><p id="findingRevenueText">Loading calculated result…</p></article>
+<article class="insight"><div class="tag">Diagnose</div><h3 id="findingDept">Department drivers</h3><p id="findingDeptText">Loading calculated result…</p></article>
+<article class="insight"><div class="tag">Decide</div><h3>Investigate before acting</h3><p>Validate the largest account variance with the owner, document price/volume/timing/coding evidence, and review the next month. A variance is a signal, not proof of cause.</p></article>
+</div><div class="note"><strong>Metric rule:</strong> Revenue variance = actual − budget (positive is generally favourable). Expense variance = actual − budget (positive is generally unfavourable). Operating-profit variance = actual operating profit − budget operating profit.</div></div></section>
+<section class="section"><div class="sectionhead"><div><h2>Built around real user needs</h2><p class="muted">User stories keep the dashboard tied to decisions.</p></div></div><div class="insights">
+<article class="insight"><div class="tag">Finance Director</div><h3>“Am I on plan?”</h3><p>See revenue, operating profit and margin vs budget immediately to prioritize the monthly review.</p></article>
+<article class="insight"><div class="tag">FP&amp;A Analyst</div><h3>“When did the gap start?”</h3><p>Compare month trends and variance percentages to identify periods needing investigation.</p></article>
+<article class="insight"><div class="tag">Department Manager</div><h3>“What should I investigate?”</h3><p>Rank department and account variances, then assign an owner and follow-up date.</p></article>
+</div></section>
+<section class="section" id="deliverables"><div class="sectionhead"><div><h2>Project deliverables</h2><p class="muted">Code, definitions, tests and the Birst build blueprint are part of the same repository.</p></div></div><div class="assets">
+<article class="asset"><div class="asseticon">PY</div><div><h3>Python analysis</h3><p>Reproducible KPIs, validation and chart generation.</p><a href="./python/analyze_finance.py">Open analysis script ↗</a></div></article>
+<article class="asset"><div class="asseticon">SQL</div><div><h3>Finance KPI queries</h3><p>Monthly aggregation, department variance and QA checks.</p><a href="./sql/02_finance_kpi_queries.sql">Open SQL queries ↗</a></div></article>
+<article class="asset"><div class="asseticon">BI</div><div><h3>Infor Birst guide</h3><p>Subject area, measures, Visualizer reports, filters and reconciliation.</p><a href="./birst/BIRST_FINANCE_MODEL_AND_DASHBOARD_GUIDE.md">Open Birst blueprint ↗</a></div></article>
+<article class="asset"><div class="asseticon">QA</div><div><h3>Automated tests</h3><p>Fact grain, keys, amounts, periods and profit calculations.</p><a href="./tests/test_finance_project.py">Open tests ↗</a></div></article>
+<article class="asset"><div class="asseticon">CSV</div><div><h3>Synthetic data</h3><p>Fact table and three supporting dimensions.</p><a href="./data/synthetic/fact_finance_monthly.csv">View fact data ↗</a></div></article>
+<article class="asset"><div class="asseticon">DOC</div><div><h3>KPI &amp; user stories</h3><p>Definitions, acceptance criteria, QA plan and interview walkthrough.</p><a href="./docs/USER_STORIES_AND_ACCEPTANCE_CRITERIA.md">Open user stories ↗</a></div></article>
+</div></section>
+<section class="section"><div class="sectionhead"><div><h2>Tools and methods</h2><p class="muted">Birst is the planned BI implementation; this GitHub page itself is a static portfolio.</p></div></div><div class="pills"><span class="pill">Infor Birst blueprint</span><span class="pill">SQL / PostgreSQL-compatible</span><span class="pill">Python</span><span class="pill">pandas</span><span class="pill">NumPy</span><span class="pill">Matplotlib</span><span class="pill">Data quality</span><span class="pill">Display → Diagnose → Decide</span><span class="pill">User stories</span></div></section>
+</main><footer><div class="wrap foot"><span>Finance KPI &amp; Budget vs Actual Analytics · Portfolio case study</span><span>Synthetic figures only · No live Birst deployment claimed</span></div></footer>
+<script>
+(async function(){
+ const fmt=n=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0,notation:'compact'}).format(n);
+ try{
+  const [kpiRes,deptRes,acctRes]=await Promise.all([
+   fetch('./outputs/executive_kpis.csv'),fetch('./outputs/department_profit_variance.csv'),fetch('./outputs/account_variance_summary.csv')
+  ]);
+  if(!kpiRes.ok||!deptRes.ok||!acctRes.ok) throw new Error('Generated summary files not available yet');
+  const parse=async r=>(await r.text()).trim().split(/\r?\n/).slice(1).map(line=>{const i=line.indexOf(',');return [line.slice(0,i),line.slice(i+1)]});
+  const k=Object.fromEntries(await parse(kpiRes).then(rows=>rows.map(([a,b])=>[a,Number(b)])));
+  const depts=await parse(deptRes), accounts=await parse(acctRes);
+  // CSVs with descriptive labels may include commas; use a small quoted-field parser for tables.
+  const csv=async r=>{const lines=(await r.text()).trim().split(/\r?\n/);return lines.slice(1).map(line=>{let a=[],v='',q=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'&&line[i+1]==='"'&&q){v+='"';i++}else if(c==='"')q=!q;else if(c===','&&!q){a.push(v);v=''}else v+=c}a.push(v);return a})};
+  const readCsv=async url=>{const r=await fetch(url);return csv(r)};
+  const d=await readCsv('./outputs/department_profit_variance.csv');
+  const a=await readCsv('./outputs/account_variance_summary.csv');
+  const rev=k.revenue_actual,brev=k.revenue_budget,op=k.operating_profit_actual,bop=k.operating_profit_budget;
+  document.getElementById('revActual').textContent=fmt(rev);
+  document.getElementById('revBudget').textContent=fmt(brev);
+  document.getElementById('revVariance').textContent=(rev-brev>=0?'+':'')+fmt(rev-brev)+' · '+((rev-brev)/brev*100).toFixed(2)+'% vs budget';
+  document.getElementById('profitActual').textContent=fmt(op);
+  document.getElementById('profitBudget').textContent=fmt(bop);
+  document.getElementById('profitVariance').textContent=(op-bop>=0?'+':'')+fmt(op-bop)+' vs budget';
+  document.getElementById('marginActual').textContent=k.operating_margin_actual_pct.toFixed(2)+'%';
+  document.getElementById('marginBudget').textContent=k.operating_margin_budget_pct.toFixed(2)+'%';
+  document.getElementById('marginGap').textContent=(k.operating_margin_actual_pct-k.operating_margin_budget_pct>=0?'+':'')+(k.operating_margin_actual_pct-k.operating_margin_budget_pct).toFixed(2)+' percentage points';
+  document.getElementById('findingRevenue').textContent=rev>=brev?'Revenue finished above budget':'Revenue finished below budget';
+  document.getElementById('findingRevenueText').textContent='Actual revenue was '+fmt(rev)+' against '+fmt(brev)+' budget; the gap was '+fmt(rev-brev)+'.';
+  const nameIndex=d[0].length;
+  const best=[...d].sort((x,y)=>Number(y[12])-Number(x[12]))[0];
+  const worst=[...d].sort((x,y)=>Number(x[12])-Number(y[12]))[0];
+  document.getElementById('findingDept').textContent='Department results were mixed';
+  document.getElementById('findingDeptText').textContent='Strongest operating-profit variance: '+best[1]+' ('+fmt(Number(best[12]))+'); weakest: '+worst[1]+' ('+fmt(Number(worst[12]))+'). Validate the driver before assigning cause.';
+ }catch(e){
+  document.getElementById('findingRevenueText').textContent='Run python python/analyze_finance.py to generate the summaries used by this dashboard.';
+  document.getElementById('findingDeptText').textContent='The charts and summary CSVs are generated from the included synthetic dataset.';
+ }
+})();
+</script></body></html>

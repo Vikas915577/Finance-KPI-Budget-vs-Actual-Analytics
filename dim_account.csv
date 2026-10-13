@@ -1,8 +1,8 @@
-account_id,account_name,account_type,financial_line,is_expense
-4000,Product and Service Revenue,Revenue,Revenue,False
-5000,Cost of Goods Sold,COGS,Cost of Goods Sold,True
-6100,Salaries and Benefits,Operating Expense,Operating Expense,True
-6200,Marketing,Operating Expense,Operating Expense,True
-6300,Software and Cloud,Operating Expense,Operating Expense,True
-6400,Travel and Training,Operating Expense,Operating Expense,True
-6500,Facilities and Utilities,Operating Expense,Operating Expense,True
+account_id,account_name,account_type
+A01,Product Revenue,Revenue
+A02,Service Revenue,Revenue
+A03,Direct Materials,COGS
+A04,Delivery & Fulfilment,COGS
+A05,Salaries & Benefits,Operating Expense
+A06,Marketing Spend,Operating Expense
+A07,Facilities & Admin,Operating Expense

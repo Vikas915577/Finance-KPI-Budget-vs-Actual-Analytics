@@ -1,34 +1,46 @@
-# Finance KPI & Budget vs Actual Analytics (Infor Birst Portfolio Project)
+# Finance KPI & Budget vs Actual Analytics
+### Infor Birst • SQL • Python • Display → Diagnose → Decide
 
-**Project goal:** Show how a BI analyst can model finance data, compare actuals with budgets, define clear financial KPIs, validate results, and plan an **Infor Birst** dashboard.
+> **Data disclosure:** This is a portfolio case study built on deterministic synthetic data. It is not an employer project, and the repository does not claim that a live Infor Birst dashboard has been deployed.
 
-> **Data disclosure:** All source figures are generated synthetic portfolio data, not actual company results. This repository includes a Birst model/dashboard build guide, not a live Birst deployment. Do not describe it as a real employer project.
+## Executive question
+**Where are actual revenue and operating profit deviating from budget, what is driving the gap, and what should the finance owner investigate next?**
 
-## Business questions
-1. Is monthly revenue above or below budget?
-2. How do actual and budget operating profit compare?
-3. Which departments show the largest operating-profit variance?
-4. Which expense accounts explain above-budget spending?
-5. How do revenue, operating margin, department, and region relate?
+## Decision-first dashboard design: Display → Diagnose → Decide (DDD)
+1. **Display — What happened?** Actual vs budget revenue, operating profit, operating margin, variance and monthly trend.
+2. **Diagnose — Where is the gap?** Department, region and account breakdowns; identify the largest variances and drill to the relevant account/period.
+3. **Decide — What should happen next?** Assign a variance owner, validate price/volume/timing/coding, agree a corrective action and due date, then monitor the next period. The data flags investigation priorities; it does not prove root cause by itself.
 
-## Primary BI tool: Infor Birst
-The Birst guide outlines an importable fact/dimension model, a Finance Performance subject area, KPIs, Visualizer reports, dashboard filters, and validation steps. This is aligned to Birst's documented dashboard, filter, subject-area and attribute/measure concepts. The dashboard must still be built and tested in a Birst practice space before claiming implementation.
+## Business user stories
+- **Finance Director:** As a Finance Director, I want actual vs budget revenue, operating profit and margin at a glance, so I can see whether the business is on plan and focus the monthly review.
+- **FP&A Analyst:** As an FP&A Analyst, I want to compare monthly trends and variance percentages, so I can spot when performance starts to diverge from plan.
+- **Department Manager:** As a Department Manager, I want a ranked department variance view with account-level drill-down, so I can investigate the cost or revenue lines that need attention.
+- **Regional Leader:** As a Regional Leader, I want consistent region filters and the same KPI definitions, so I can compare performance fairly across regions.
+- **Data/BI Owner:** As a BI Owner, I want row-grain, foreign-key and reconciliation checks, so decision-makers can trust the dashboard figures.
 
-## Tools
-- **Infor Birst:** planned data model, custom subject area, KPI dashlets, Visualizer reports and dashboard filters.
-- **SQL (PostgreSQL-compatible):** finance aggregations, department/region comparisons, expense variance and reconciliation checks.
-- **Python:** pandas/NumPy calculations, validation, derived KPIs and charts.
+### Acceptance criteria (sample)
+- Actual, budget and variance use a documented definition and matching filters.
+- Revenue variance = actual revenue − budget revenue.
+- Expense variance = actual expense − budget expense; positive values mean overspend.
+- Operating-profit variance = actual operating profit − budget operating profit.
+- Month, region, department and account filters affect the visuals consistently in the eventual Birst dashboard.
+- Every insight distinguishes an observed pattern from a hypothesis; proposed actions have an owner and follow-up date.
+- Synthetic data is clearly disclosed; no claim is made that Birst deployment has been completed.
 
-## Data model and size
-- `fact_finance_monthly`: one row per month × region × department × account.
-- `dim_account`: Revenue, COGS and Operating Expense classification.
-- `dim_department`: department labels.
-- `dim_region`: region labels.
+## Dataset and model
+- **1,680 fact rows** = 12 months × 4 regions × 5 departments × 7 accounts.
+- Fact grain: one row per month × region × department × account.
+- Dimensions: account (with account type), department and region.
+- Amounts are synthetic currency examples in USD; do not use them as real company results.
 
-Generated fact rows: **1,680** across 12 months, 4 regions, 5 departments and 7 accounts.
+## Tech stack
+- **Infor Birst (planned implementation):** model/subject area, measures and attributes, Visualizer reports, dashboard filters, KPI tiles, dashboard publishing and validation.
+- **SQL:** finance KPI aggregation, variance breakdowns and quality/reconciliation checks.
+- **Python:** pandas/NumPy calculations, data-quality assertions, CSV outputs and Matplotlib charts.
+- **GitHub Pages:** responsive static portfolio overview; this is a presentation layer and is not a live Birst connection.
 
-## How to run
-Python 3.10+ recommended. From the project root:
+## Run locally
+Python 3.10+ recommended.
 
 ```bash
 python -m pip install -r requirements.txt
@@ -36,44 +48,35 @@ python python/analyze_finance.py
 python -m unittest discover -s tests -v
 ```
 
-The analysis writes KPI and variance CSVs plus chart PNGs into `outputs/`.
-
-## Included outputs
-- `outputs/executive_kpis.csv` — executive finance metrics.
-- `outputs/monthly_pnl_summary.csv` — monthly actual/budget revenue, COGS, operating expense, profit and margin.
-- `outputs/department_profit_variance.csv` — operating-profit variance by department.
-- `outputs/account_variance_summary.csv` — account-level budget vs actual.
-- `outputs/region_revenue_variance.csv` — regional revenue performance.
-- `outputs/findings.txt` — data-derived findings, explicitly labelled synthetic.
-- `outputs/charts/` — four chart images.
-- `birst/BIRST_FINANCE_MODEL_AND_DASHBOARD_GUIDE.md` — Birst model and build guide.
-
-## Important interpretation rule
-**Variance = Actual − Budget.** Positive revenue variance is generally favorable; positive expense variance is generally unfavorable. For overall performance, review Operating Profit Variance (actual operating profit minus budget operating profit), not one undifferentiated variance field.
+Outputs are written to `outputs/`, including KPI CSVs, department/region/account summaries, findings and charts.
 
 ## Project structure
 ```text
-data/synthetic/   # generated finance fact and dimension CSVs
-sql/              # schema, KPI queries, QA/reconciliation
-python/            # reproducible analysis script
-outputs/           # results and charts (regeneratable)
-birst/             # Infor Birst model & dashboard implementation guide
-tests/             # automated data validation tests
-docs/              # project notes
+index.html                         # responsive DDD portfolio landing page
+README.md                          # project overview and truthful disclosure
+data/synthetic/                    # fact and dimension CSVs
+sql/                               # schema, KPI queries, QA checks
+python/analyze_finance.py          # reproducible analysis and chart generation
+outputs/                           # generated results and four charts
+birst/                             # implementation blueprint and report catalogue
+docs/                              # user stories, definitions, decision log, QA plan
+tests/                             # automated validation tests
 ```
 
-## GitHub upload checklist
-1. Create a public repository such as `finance-kpi-budget-vs-actual`.
-2. Upload the **contents** of this ZIP, not only the ZIP file.
-3. Ensure README renders and relative image paths (if added) work.
-4. Never upload company data, access credentials, or private screenshots.
-5. Build the dashboard in your own Infor Birst practice space; capture your own screenshot only after validation.
-6. Add your project month/year and update the README with what you personally completed.
+## Infor Birst implementation blueprint
+See [`birst/BIRST_FINANCE_MODEL_AND_DASHBOARD_GUIDE.md`](birst/BIRST_FINANCE_MODEL_AND_DASHBOARD_GUIDE.md). It separates the design from a real deployment. In Birst, configure a finance subject area with clear measures and attributes; create KPI tiles and Visualizer reports; add shared date/region/department/account filters; publish a dashboard; and reconcile sampled values against SQL/Python outputs. Only mark implementation complete after doing this inside an authorized Birst practice space.
 
-## Resume wording — use after reviewing and being able to explain the work
-**Finance KPI & Budget vs Actual Analytics | Infor Birst, SQL, Python**
-- Modeled monthly budget and actual finance data across revenue, cost of goods sold and operating expenses using fact/dimension tables.
-- Analyzed revenue, operating-profit and expense variances with SQL and Python; built reproducible KPI summaries and charts from synthetic data.
-- Designed an Infor Birst implementation guide covering a Finance Performance subject area, KPI tiles, Visualizer reports, dashboard filters and reconciliation checks.
+## Portfolio/resume wording (only claim what you can explain)
+**Finance KPI & Budget vs Actual Analytics | SQL, Python, Infor Birst design**
+- Built a synthetic finance fact/dimension model and analyzed budget vs actual revenue, COGS, operating expenses, operating profit and margin.
+- Created repeatable Python analysis and SQL queries with row-grain, dimension-key and financial reconciliation checks.
+- Designed a DDD-oriented dashboard blueprint and user stories for an Infor Birst implementation, with clear variance definitions and decision-focused follow-up.
 
-Do not say you deployed a Birst dashboard unless you have built and tested it inside Birst.
+**Do not say “deployed an Infor Birst dashboard” until you have personally built and validated it in Birst.**
+
+## References
+- Infor, [Analytics with Birst](https://developer.infor.com/tutorials/analytics-with-birst): modeling, semantic layer, Visualizer, Designer and dashboards.
+- Infor documentation, [Manage subject areas](https://docs.infor.com/birst/2026.x/en-us/birstolh/admin/adminsubjectarea.html): subject areas control which measures/attributes are available to report authors.
+- Infor documentation, [Using Smart Insights](https://docs.infor.com/birst/2026.10/en-us/birstolh/dashboards_user/ill1655271262734.html): KPI analysis can use varied attributes, time intervals and dashboard filters; results depend on data volume and configuration.
+- Infor, [Dashboard filters and dynamic dimensions/measures](https://developer.infor.com/tutorials/analytics/dynamically-change-measures-and-dimensions-in-a-report-using-a-dashboard-filter/): interactive exploration.
+- Data storytelling, [Databricks overview](https://www.databricks.com/blog/what-is-data-storytelling): distinguish dashboards for monitoring from narratives that explain implications and actions.

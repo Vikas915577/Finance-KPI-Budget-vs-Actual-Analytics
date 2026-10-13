@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
-"""Budget-vs-actual finance KPI analysis for synthetic portfolio data."""
+"""Reproducible finance KPI analysis for synthetic portfolio data."""
 from pathlib import Path
 import argparse
-import pandas as pd
 import numpy as np
+import pandas as pd
+import matplotlib
+matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 KEY = ["month_start", "region_id", "department_id", "account_id"]
@@ -20,124 +22,123 @@ def validate(fact, account, region, dept):
         raise ValueError("Duplicate fact grain: month × region × department × account")
     if fact[KEY].isna().any().any():
         raise ValueError("Missing key values in fact table")
+    if fact[["budget_amount", "actual_amount"]].isna().any().any():
+        raise ValueError("Missing financial amounts")
     if (fact[["budget_amount", "actual_amount"]] < 0).any().any():
-        raise ValueError("Negative amounts are not expected in this simplified model")
-    if not set(fact.account_id).issubset(set(account.account_id)):
-        raise ValueError("Unknown account_id in fact data")
-    if not set(fact.region_id).issubset(set(region.region_id)):
-        raise ValueError("Unknown region_id in fact data")
-    if not set(fact.department_id).issubset(set(dept.department_id)):
-        raise ValueError("Unknown department_id in fact data")
+        raise ValueError("Negative line-item amounts are outside this demo's model assumptions")
+    for col, dim, key in [
+        ("account_id", account, "account_id"),
+        ("region_id", region, "region_id"),
+        ("department_id", dept, "department_id"),
+    ]:
+        if not set(fact[col]).issubset(set(dim[key])):
+            raise ValueError(f"Unmatched {col} foreign key")
+    if fact["month_start"].nunique() != 12:
+        raise ValueError("Expected 12 monthly periods for this portfolio dataset")
+    return True
 
 def enrich(fact, account, region, dept):
-    df = fact.merge(account, on="account_id", validate="many_to_one") \
-             .merge(region, on="region_id", validate="many_to_one") \
-             .merge(dept, on="department_id", validate="many_to_one")
+    df = (fact.merge(account, on="account_id", validate="many_to_one")
+              .merge(region, on="region_id", validate="many_to_one")
+              .merge(dept, on="department_id", validate="many_to_one"))
     df["variance_amount"] = df["actual_amount"] - df["budget_amount"]
     df["variance_pct"] = np.where(df["budget_amount"] != 0,
-                                   df["variance_amount"] / df["budget_amount"] * 100, np.nan)
-    # Profit contribution is positive for revenue and negative for COGS/operating expenses.
-    df["actual_profit_contribution"] = np.where(df.account_type == "Revenue", df.actual_amount, -df.actual_amount)
-    df["budget_profit_contribution"] = np.where(df.account_type == "Revenue", df.budget_amount, -df.budget_amount)
+                                  df["variance_amount"] / df["budget_amount"] * 100, np.nan)
     return df
 
-def make_monthly(df):
-    p = df.groupby("month_start", as_index=False).agg(
-        actual_revenue=("actual_amount", lambda s: 0), budget_revenue=("budget_amount", lambda s: 0))
-    # Explicitly build P&L totals by month to keep line semantics transparent.
-    revenue = df[df.account_type == "Revenue"].groupby("month_start").agg(actual_revenue=("actual_amount","sum"), budget_revenue=("budget_amount","sum"))
-    cogs = df[df.account_type == "COGS"].groupby("month_start").agg(actual_cogs=("actual_amount","sum"), budget_cogs=("budget_amount","sum"))
-    opex = df[df.account_type == "Operating Expense"].groupby("month_start").agg(actual_opex=("actual_amount","sum"), budget_opex=("budget_amount","sum"))
-    out = revenue.join(cogs).join(opex).reset_index()
-    out["actual_gross_profit"] = out.actual_revenue - out.actual_cogs
-    out["budget_gross_profit"] = out.budget_revenue - out.budget_cogs
-    out["actual_operating_profit"] = out.actual_revenue - out.actual_cogs - out.actual_opex
-    out["budget_operating_profit"] = out.budget_revenue - out.budget_cogs - out.budget_opex
-    out["revenue_variance"] = out.actual_revenue - out.budget_revenue
-    out["opex_variance"] = out.actual_opex - out.budget_opex
-    out["operating_profit_variance"] = out.actual_operating_profit - out.budget_operating_profit
-    out["actual_operating_margin_pct"] = np.where(out.actual_revenue != 0, out.actual_operating_profit/out.actual_revenue*100, np.nan)
-    out["budget_operating_margin_pct"] = np.where(out.budget_revenue != 0, out.budget_operating_profit/out.budget_revenue*100, np.nan)
+def pnl_by_period(df, dimensions):
+    keys = dimensions
+    def sums(kind, prefix):
+        sub = df[df.account_type == kind].groupby(keys, as_index=False).agg(
+            **{f"{prefix}_actual": ("actual_amount", "sum"),
+               f"{prefix}_budget": ("budget_amount", "sum")})
+        return sub
+    rev=sums("Revenue","revenue")
+    cogs=sums("COGS","cogs")
+    opex=sums("Operating Expense","opex")
+    out=rev.merge(cogs,on=keys,validate="one_to_one").merge(opex,on=keys,validate="one_to_one")
+    out["operating_profit_actual"]=out.revenue_actual-out.cogs_actual-out.opex_actual
+    out["operating_profit_budget"]=out.revenue_budget-out.cogs_budget-out.opex_budget
+    out["revenue_variance"]=out.revenue_actual-out.revenue_budget
+    out["opex_variance"]=out.opex_actual-out.opex_budget
+    out["operating_profit_variance"]=out.operating_profit_actual-out.operating_profit_budget
+    out["operating_margin_actual_pct"]=np.where(out.revenue_actual!=0,out.operating_profit_actual/out.revenue_actual*100,np.nan)
+    out["operating_margin_budget_pct"]=np.where(out.revenue_budget!=0,out.operating_profit_budget/out.revenue_budget*100,np.nan)
     return out
 
-def make_org_variance(df):
-    revenue = df[df.account_type == "Revenue"].groupby(["department_id","department_name"],as_index=False).agg(actual_revenue=("actual_amount","sum"),budget_revenue=("budget_amount","sum"))
-    cogs = df[df.account_type == "COGS"].groupby(["department_id","department_name"],as_index=False).agg(actual_cogs=("actual_amount","sum"),budget_cogs=("budget_amount","sum"))
-    opex = df[df.account_type == "Operating Expense"].groupby(["department_id","department_name"],as_index=False).agg(actual_opex=("actual_amount","sum"),budget_opex=("budget_amount","sum"))
-    out = revenue.merge(cogs,on=["department_id","department_name"]).merge(opex,on=["department_id","department_name"])
-    out["actual_operating_profit"] = out.actual_revenue-out.actual_cogs-out.actual_opex
-    out["budget_operating_profit"] = out.budget_revenue-out.budget_cogs-out.budget_opex
-    out["operating_profit_variance"] = out.actual_operating_profit-out.budget_operating_profit
-    out["actual_operating_margin_pct"] = np.where(out.actual_revenue!=0,out.actual_operating_profit/out.actual_revenue*100,np.nan)
-    out["budget_operating_margin_pct"] = np.where(out.budget_revenue!=0,out.budget_operating_profit/out.budget_revenue*100,np.nan)
-    return out
-
-def main():
-    ap=argparse.ArgumentParser()
-    ap.add_argument("--data-dir",default="data/synthetic")
-    ap.add_argument("--output-dir",default="outputs")
-    args=ap.parse_args()
-    data_dir, outdir=Path(args.data_dir),Path(args.output_dir)
-    outdir.mkdir(parents=True,exist_ok=True); (outdir/"charts").mkdir(parents=True,exist_ok=True)
+def run(data_dir: Path, output_dir: Path):
+    output_dir.mkdir(parents=True,exist_ok=True)
+    charts=output_dir/"charts"; charts.mkdir(parents=True,exist_ok=True)
     fact,account,region,dept=load_data(data_dir)
     validate(fact,account,region,dept)
     df=enrich(fact,account,region,dept)
-    monthly=make_monthly(df); monthly.to_csv(outdir/"monthly_pnl_summary.csv",index=False,date_format="%Y-%m-%d")
-    org=make_org_variance(df); org.to_csv(outdir/"department_profit_variance.csv",index=False)
-    acct=df.groupby(["account_id","account_name","account_type"],as_index=False).agg(actual_amount=("actual_amount","sum"),budget_amount=("budget_amount","sum"),variance_amount=("variance_amount","sum"))
-    acct["variance_pct"]=np.where(acct.budget_amount!=0,acct.variance_amount/acct.budget_amount*100,np.nan)
-    acct.to_csv(outdir/"account_variance_summary.csv",index=False)
-    region_sum=df[df.account_type=="Revenue"].groupby(["region_id","region_name"],as_index=False).agg(actual_revenue=("actual_amount","sum"),budget_revenue=("budget_amount","sum"))
-    region_sum["revenue_variance"]=region_sum.actual_revenue-region_sum.budget_revenue
-    region_sum.to_csv(outdir/"region_revenue_variance.csv",index=False)
-    # KPI outputs: totals computed after joining details, with explicit account classifications.
-    total_revenue_actual=float(df.loc[df.account_type=="Revenue","actual_amount"].sum())
-    total_revenue_budget=float(df.loc[df.account_type=="Revenue","budget_amount"].sum())
-    total_cogs_actual=float(df.loc[df.account_type=="COGS","actual_amount"].sum())
-    total_cogs_budget=float(df.loc[df.account_type=="COGS","budget_amount"].sum())
-    total_opex_actual=float(df.loc[df.account_type=="Operating Expense","actual_amount"].sum())
-    total_opex_budget=float(df.loc[df.account_type=="Operating Expense","budget_amount"].sum())
-    actual_op=total_revenue_actual-total_cogs_actual-total_opex_actual
-    budget_op=total_revenue_budget-total_cogs_budget-total_opex_budget
-    kpis=[
-      ("Period start",str(df.month_start.min().date())),("Period end",str(df.month_start.max().date())),
-      ("Fact rows",int(len(df))),("Unique departments",int(df.department_id.nunique())),("Regions",int(df.region_id.nunique())),
-      ("Actual revenue",round(total_revenue_actual,2)),("Budget revenue",round(total_revenue_budget,2)),
-      ("Revenue variance",round(total_revenue_actual-total_revenue_budget,2)),
-      ("Actual COGS",round(total_cogs_actual,2)),("Budget COGS",round(total_cogs_budget,2)),
-      ("Actual operating expenses",round(total_opex_actual,2)),("Budget operating expenses",round(total_opex_budget,2)),
-      ("Actual operating profit",round(actual_op,2)),("Budget operating profit",round(budget_op,2)),
-      ("Operating profit variance",round(actual_op-budget_op,2)),
-      ("Actual operating margin pct",round(actual_op/total_revenue_actual*100,2) if total_revenue_actual else None),
-      ("Budget operating margin pct",round(budget_op/total_revenue_budget*100,2) if total_revenue_budget else None),
-    ]
-    pd.DataFrame(kpis,columns=["metric","value"]).to_csv(outdir/"executive_kpis.csv",index=False)
-    # Charts
-    plot=monthly.copy(); plot["period"]=pd.to_datetime(plot.month_start).dt.strftime("%b")
-    plt.figure(figsize=(10,5)); plt.plot(plot.period,plot.actual_revenue,marker="o",label="Actual Revenue"); plt.plot(plot.period,plot.budget_revenue,marker="o",label="Budget Revenue")
-    plt.title("Monthly Revenue: Actual vs Budget"); plt.xlabel("Month"); plt.ylabel("Amount (USD)"); plt.legend(); plt.tight_layout(); plt.savefig(outdir/"charts/monthly_revenue_actual_vs_budget.png",dpi=150); plt.close()
-    org_sorted=org.sort_values("operating_profit_variance")
-    plt.figure(figsize=(9,5)); plt.bar(org_sorted.department_name,org_sorted.operating_profit_variance)
-    plt.axhline(0,linewidth=1); plt.title("Operating Profit Variance by Department"); plt.xlabel("Department"); plt.ylabel("Actual Operating Profit − Budget (USD)"); plt.xticks(rotation=20,ha="right"); plt.tight_layout(); plt.savefig(outdir/"charts/operating_profit_variance_by_department.png",dpi=150); plt.close()
-    exp=df[df.account_type=="Operating Expense"].groupby(["account_id","account_name"],as_index=False).agg(actual=("actual_amount","sum"),budget=("budget_amount","sum")); exp["variance"]=exp.actual-exp.budget; exp=exp.sort_values("variance")
-    plt.figure(figsize=(10,5)); plt.bar(exp.account_name,exp.variance); plt.axhline(0,linewidth=1); plt.title("Operating Expense Variance by Account"); plt.xlabel("Expense Account"); plt.ylabel("Actual − Budget (USD)"); plt.xticks(rotation=25,ha="right"); plt.tight_layout(); plt.savefig(outdir/"charts/operating_expense_variance_by_account.png",dpi=150); plt.close()
-    plt.figure(figsize=(9,5)); plt.scatter(monthly.actual_revenue,monthly.actual_operating_margin_pct); plt.xlabel("Actual Revenue (USD)"); plt.ylabel("Actual Operating Margin (%)"); plt.title("Revenue vs Operating Margin by Month"); plt.tight_layout(); plt.savefig(outdir/"charts/revenue_vs_operating_margin.png",dpi=150); plt.close()
-    # Derive, don't hard-code, demo findings.
-    best=org.sort_values("operating_profit_variance",ascending=False).iloc[0]; worst=org.sort_values("operating_profit_variance").iloc[0]
-    rev_var=total_revenue_actual-total_revenue_budget; op_var=actual_op-budget_op
-    over=exp.sort_values("variance",ascending=False).iloc[0]
+    monthly=pnl_by_period(df,["month_start"])
+    monthly.to_csv(output_dir/"monthly_pnl_summary.csv",index=False,date_format="%Y-%m-%d")
+    department=pnl_by_period(df,["department_id","department_name"])
+    department.to_csv(output_dir/"department_profit_variance.csv",index=False)
+    region_pnl=pnl_by_period(df,["region_id","region_name"])
+    region_pnl["revenue_variance_pct"]=np.where(region_pnl.revenue_budget!=0,region_pnl.revenue_variance/region_pnl.revenue_budget*100,np.nan)
+    region_pnl.to_csv(output_dir/"region_performance.csv",index=False)
+    account_summary=df.groupby(["account_id","account_name","account_type"],as_index=False).agg(
+        actual_amount=("actual_amount","sum"),budget_amount=("budget_amount","sum"),variance_amount=("variance_amount","sum"))
+    account_summary["variance_pct"]=np.where(account_summary.budget_amount!=0,account_summary.variance_amount/account_summary.budget_amount*100,np.nan)
+    account_summary["interpretation"]=np.where(account_summary.account_type=="Revenue",
+        np.where(account_summary.variance_amount>=0,"Favourable revenue variance","Unfavourable revenue variance"),
+        np.where(account_summary.variance_amount>=0,"Unfavourable cost variance","Favourable cost variance"))
+    account_summary.to_csv(output_dir/"account_variance_summary.csv",index=False)
+    total={}
+    for kind, label in [("Revenue","revenue"),("COGS","cogs"),("Operating Expense","opex")]:
+        sub=df[df.account_type==kind]
+        total[f"{label}_actual"]=float(sub.actual_amount.sum())
+        total[f"{label}_budget"]=float(sub.budget_amount.sum())
+    total["operating_profit_actual"]=total["revenue_actual"]-total["cogs_actual"]-total["opex_actual"]
+    total["operating_profit_budget"]=total["revenue_budget"]-total["cogs_budget"]-total["opex_budget"]
+    total["revenue_variance"]=total["revenue_actual"]-total["revenue_budget"]
+    total["operating_profit_variance"]=total["operating_profit_actual"]-total["operating_profit_budget"]
+    total["operating_margin_actual_pct"]=total["operating_profit_actual"]/total["revenue_actual"]*100
+    total["operating_margin_budget_pct"]=total["operating_profit_budget"]/total["revenue_budget"]*100
+    pd.DataFrame([{"metric":k,"value":round(v,2)} for k,v in total.items()]).to_csv(output_dir/"executive_kpis.csv",index=False)
+    # Charts: each chart compares performance to a plan or explains a variance.
+    m=monthly.copy(); m["period"]=pd.to_datetime(m.month_start).dt.strftime("%b")
+    plt.figure(figsize=(10,4.8))
+    plt.plot(m.period,m.revenue_actual,marker="o",label="Actual revenue")
+    plt.plot(m.period,m.revenue_budget,marker="o",label="Budget revenue")
+    plt.title("Display | Monthly revenue vs budget"); plt.xlabel("Month"); plt.ylabel("Amount (USD)")
+    plt.legend(); plt.tight_layout(); plt.savefig(charts/"01_monthly_revenue_actual_vs_budget.png",dpi=150); plt.close()
+    d=department.sort_values("operating_profit_variance")
+    plt.figure(figsize=(9,4.8)); plt.bar(d.department_name,d.operating_profit_variance)
+    plt.axhline(0,linewidth=1); plt.title("Diagnose | Operating-profit variance by department")
+    plt.xlabel("Department"); plt.ylabel("Actual operating profit − budget (USD)")
+    plt.xticks(rotation=18,ha="right"); plt.tight_layout(); plt.savefig(charts/"02_operating_profit_variance_by_department.png",dpi=150); plt.close()
+    e=account_summary[account_summary.account_type=="Operating Expense"].sort_values("variance_amount")
+    plt.figure(figsize=(9,4.8)); plt.bar(e.account_name,e.variance_amount)
+    plt.axhline(0,linewidth=1); plt.title("Diagnose | Expense variance by account")
+    plt.xlabel("Expense account"); plt.ylabel("Actual − budget (USD)")
+    plt.xticks(rotation=18,ha="right"); plt.tight_layout(); plt.savefig(charts/"03_expense_variance_by_account.png",dpi=150); plt.close()
+    plt.figure(figsize=(8,4.8)); plt.scatter(monthly.revenue_actual,monthly.operating_margin_actual_pct)
+    plt.title("Diagnose | Revenue vs operating margin by month"); plt.xlabel("Actual revenue (USD)"); plt.ylabel("Operating margin (%)")
+    plt.tight_layout(); plt.savefig(charts/"04_revenue_vs_operating_margin.png",dpi=150); plt.close()
+    best=department.sort_values("operating_profit_variance",ascending=False).iloc[0]
+    worst=department.sort_values("operating_profit_variance").iloc[0]
+    top_exp=e.sort_values("variance_amount",ascending=False).iloc[0]
+    rev_var=total["revenue_variance"]
     findings=[
-      f"Actual revenue was ${total_revenue_actual:,.0f} against a budget of ${total_revenue_budget:,.0f}; the revenue variance was ${rev_var:,.0f} ({rev_var/total_revenue_budget*100:.2f}% of budget).",
-      f"Actual operating profit was ${actual_op:,.0f} against a budget of ${budget_op:,.0f}; operating-profit variance was ${op_var:,.0f}.",
-      f"{best.department_name} had the strongest operating-profit variance (${best.operating_profit_variance:,.0f}) in this synthetic dataset.",
-      f"{worst.department_name} had the weakest operating-profit variance (${worst.operating_profit_variance:,.0f}) in this synthetic dataset.",
-      f"{over.account_name} had the largest positive expense variance (actual above budget) at ${over.variance:,.0f}; review this result before drawing operational conclusions."
+      "SYNTHETIC PORTFOLIO DATA — not actual company results.",
+      f"DISPLAY: Revenue was ${total['revenue_actual']:,.0f} against budget ${total['revenue_budget']:,.0f}; variance ${rev_var:,.0f} ({rev_var/total['revenue_budget']*100:.2f}% of budget).",
+      f"DISPLAY: Operating profit was ${total['operating_profit_actual']:,.0f} against budget ${total['operating_profit_budget']:,.0f}; variance ${total['operating_profit_variance']:,.0f}.",
+      f"DIAGNOSE: {best.department_name} had the strongest operating-profit variance (${best.operating_profit_variance:,.0f}); {worst.department_name} had the weakest (${worst.operating_profit_variance:,.0f}).",
+      f"DIAGNOSE: {top_exp.account_name} had the largest positive expense variance (${top_exp.variance_amount:,.0f}); validate volume, price, timing, and coding before assigning cause.",
+      "DECIDE: Assign the variance owner to validate the largest driver, agree a corrective action and due date, then monitor next month's actual-vs-budget result. This is a proposed workflow, not proof of causation."
     ]
-    (outdir/"findings.txt").write_text("SYNTHETIC DATA DEMO FINDINGS — not real company results\n\n"+"\n".join("- "+x for x in findings)+"\n",encoding="utf-8")
-    print("Analysis complete")
-    print("Rows:",len(df))
-    print("Actual revenue:",round(total_revenue_actual,2),"Budget revenue:",round(total_revenue_budget,2))
-    print("Operating profit variance:",round(op_var,2))
-    print("Top department:",best.department_name,"Lowest department:",worst.department_name)
+    (output_dir/"findings.txt").write_text("\\n".join(findings)+"\\n",encoding="utf-8")
+    return {"rows":len(fact),"months":fact.month_start.nunique(),"departments":fact.department_id.nunique(),
+            "regions":fact.region_id.nunique(),"revenue_actual":total["revenue_actual"],
+            "revenue_budget":total["revenue_budget"],"op_profit_variance":total["operating_profit_variance"]}
 
-if __name__=="__main__": main()
+if __name__=="__main__":
+    parser=argparse.ArgumentParser()
+    parser.add_argument("--data-dir",default="data/synthetic")
+    parser.add_argument("--output-dir",default="outputs")
+    args=parser.parse_args()
+    summary=run(Path(args.data_dir),Path(args.output_dir))
+    print("Analysis complete:",summary)

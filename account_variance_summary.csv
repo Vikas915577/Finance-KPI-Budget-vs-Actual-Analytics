@@ -1,8 +1,8 @@
-account_id,account_name,account_type,actual_amount,budget_amount,variance_amount,variance_pct
-4000,Product and Service Revenue,Revenue,19473771.57,19159359.6,314411.97,1.64103590393491
-5000,Cost of Goods Sold,COGS,5954277.1,5848912.68,105364.42,1.801436023490096
-6100,Salaries and Benefits,Operating Expense,4905387.71,4842087.76,63299.95000000007,1.3072863016427456
-6200,Marketing,Operating Expense,938451.39,922783.2,15668.189999999997,1.6979275305402177
-6300,Software and Cloud,Operating Expense,822050.47,811376.88,10673.589999999998,1.3154910206462869
-6400,Travel and Training,Operating Expense,415278.6,421093.04,-5814.440000000002,-1.3807969849133583
-6500,Facilities and Utilities,Operating Expense,581494.35,575815.84,5678.510000000004,0.9861677302937697
+account_id,account_name,account_type,actual_amount,budget_amount,variance_amount,variance_pct,interpretation
+A01,Product Revenue,Revenue,26011988.74,25726522.86,285465.8800000001,1.1096170343480305,Favourable revenue variance
+A02,Service Revenue,Revenue,12957938.05,12759833.31,198104.74000000005,1.5525652662307392,Favourable revenue variance
+A03,Direct Materials,COGS,10500882.99,10285462.09,215420.8999999999,2.0944212142830416,Unfavourable cost variance
+A04,Delivery & Fulfilment,COGS,4024540.37,3928138.65,96401.72000000002,2.4541323153142782,Unfavourable cost variance
+A05,Salaries & Benefits,Operating Expense,9188102.54,8831197.56,356904.9799999999,4.041410891050204,Unfavourable cost variance
+A06,Marketing Spend,Operating Expense,3099414.04,2939947.75,159466.28999999998,5.424119867436419,Unfavourable cost variance
+A07,Facilities & Admin,Operating Expense,2321403.09,2329010.61,-7607.520000000017,-0.32664170645405594,Favourable cost variance

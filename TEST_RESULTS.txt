@@ -1,0 +1,33 @@
+Project validation report
+Fact rows: 1680
+Months: 12
+Departments: 5
+Regions: 4
+Python unittest exit code: 0
+
+STDOUT:
+
+STDERR:
+Spreadsheet runtime warmup failed during python startup
+Traceback (most recent call last):
+  File "/tmp/tmp.QlpUkOUI9D/artifact_tool_v2-2.8.66/artifact_tool/patches/warm_spreadsheet_runtime_on_startup.py", line 26, in warm_spreadsheet_runtime_on_startup
+  File "/tmp/tmp.QlpUkOUI9D/artifact_tool_v2-2.8.66/artifact_tool/spreadsheet_warmup.py", line 785, in warm_spreadsheet_runtime
+  File "/tmp/tmp.QlpUkOUI9D/artifact_tool_v2-2.8.66/artifact_tool/spreadsheet_warmup.py", line 718, in _warm_feature_flows
+  File "/tmp/tmp.QlpUkOUI9D/artifact_tool_v2-2.8.66/artifact_tool/spreadsheet_warmup.py", line 509, in _warm_drawing_and_image_flows
+  File "/tmp/tmp.QlpUkOUI9D/artifact_tool_v2-2.8.66/artifact_tool/generated/interface/models.py", line 32861, in bring_to_front
+  File "/tmp/tmp.QlpUkOUI9D/artifact_tool_v2-2.8.66/artifact_tool/rpc/remote.py", line 764, in __call__
+  File "/tmp/tmp.QlpUkOUI9D/artifact_tool_v2-2.8.66/artifact_tool/rpc/client.py", line 175, in call
+artifact_tool.rpc.client.RemoteError: Element ordering requires an owning element collection.
+test_account_classification (test_finance_project.FinanceAnalyticsTests.test_account_classification) ... ok
+test_amounts_nonnegative_and_present (test_finance_project.FinanceAnalyticsTests.test_amounts_nonnegative_and_present) ... ok
+test_dimension_keys_resolve (test_finance_project.FinanceAnalyticsTests.test_dimension_keys_resolve) ... ok
+test_expected_grain_and_row_count (test_finance_project.FinanceAnalyticsTests.test_expected_grain_and_row_count) ... ok
+test_month_coverage (test_finance_project.FinanceAnalyticsTests.test_month_coverage) ... ok
+test_profit_and_variance_reconcile (test_finance_project.FinanceAnalyticsTests.test_profit_and_variance_reconcile) ... ok
+test_validate_passes (test_finance_project.FinanceAnalyticsTests.test_validate_passes) ... ok
+
+----------------------------------------------------------------------
+Ran 7 tests in 0.045s
+
+OK
+
