@@ -1,0 +1,20 @@
+{
+  "name": "Finance KPI & Budget vs Actual Analytics",
+  "version": "1.0.0",
+  "data_type": "synthetic demonstration only",
+  "primary_bi_tool": "Infor Birst",
+  "supporting_tools": [
+    "SQL",
+    "Python",
+    "pandas",
+    "NumPy",
+    "matplotlib"
+  ],
+  "fact_rows": 1680,
+  "months": 12,
+  "regions": 4,
+  "departments": 5,
+  "accounts": 7,
+  "analysis_status": "passed",
+  "unit_tests": "5 passed"
+}

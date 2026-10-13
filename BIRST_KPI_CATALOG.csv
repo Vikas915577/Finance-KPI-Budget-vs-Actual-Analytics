@@ -1,0 +1,10 @@
+KPI,Definition,Recommended display,Validation rule,Interpretation
+Actual Revenue,SUM(actual_amount) where account_type=Revenue,KPI tile; monthly line,Reconcile by month and region,Topline actual
+Budget Revenue,SUM(budget_amount) where account_type=Revenue,KPI tile / benchmark series,Reconcile to finance source in real deployments,Planned topline
+Revenue Variance,Actual Revenue - Budget Revenue,Value and %,Variance equals actual less budget,Positive is generally favorable
+Actual COGS,SUM(actual_amount) where account_type=COGS,KPI / P&L line,Check account mapping,Cost of goods sold
+Actual Operating Expense,SUM(actual_amount) where account_type=Operating Expense,KPI / expense chart,Confirm expense account mapping,Operating cost
+Actual Operating Profit,Actual Revenue - Actual COGS - Actual Operating Expense,KPI tile,Reconcile to P&L formula,Profit before items omitted from this simplified model
+Operating Profit Variance,Actual Operating Profit - Budget Operating Profit,KPI / department bar,Must reconcile to actual P&L less budget P&L,Combined profitability variance
+Actual Operating Margin %,Actual Operating Profit / Actual Revenue * 100,KPI / monthly trend,Handle zero revenue; do not average monthly percentages blindly,Profitability ratio
+Expense Variance,Actual Expense - Budget Expense,Bar or detail table,Filter to COGS / OpEx accounts,Positive usually signals overspend

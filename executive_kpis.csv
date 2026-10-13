@@ -1,0 +1,18 @@
+metric,value
+Period start,2025-01-01
+Period end,2025-12-01
+Fact rows,1680
+Unique departments,5
+Regions,4
+Actual revenue,19473771.57
+Budget revenue,19159359.6
+Revenue variance,314411.97
+Actual COGS,5954277.1
+Budget COGS,5848912.68
+Actual operating expenses,7662662.52
+Budget operating expenses,7573156.72
+Actual operating profit,5856831.95
+Budget operating profit,5737290.2
+Operating profit variance,119541.75
+Actual operating margin pct,30.08
+Budget operating margin pct,29.95

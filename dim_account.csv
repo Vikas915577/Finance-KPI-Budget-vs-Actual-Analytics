@@ -1,0 +1,8 @@
+account_id,account_name,account_type,financial_line,is_expense
+4000,Product and Service Revenue,Revenue,Revenue,False
+5000,Cost of Goods Sold,COGS,Cost of Goods Sold,True
+6100,Salaries and Benefits,Operating Expense,Operating Expense,True
+6200,Marketing,Operating Expense,Operating Expense,True
+6300,Software and Cloud,Operating Expense,Operating Expense,True
+6400,Travel and Training,Operating Expense,Operating Expense,True
+6500,Facilities and Utilities,Operating Expense,Operating Expense,True

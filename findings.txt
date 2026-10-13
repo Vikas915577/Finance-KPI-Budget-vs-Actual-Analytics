@@ -1,0 +1,7 @@
+SYNTHETIC DATA DEMO FINDINGS — not real company results
+
+- Actual revenue was $19,473,772 against a budget of $19,159,360; the revenue variance was $314,412 (1.64% of budget).
+- Actual operating profit was $5,856,832 against a budget of $5,737,290; operating-profit variance was $119,542.
+- Sales had the strongest operating-profit variance ($107,825) in this synthetic dataset.
+- Operations had the weakest operating-profit variance ($-71,007) in this synthetic dataset.
+- Salaries and Benefits had the largest positive expense variance (actual above budget) at $63,300; review this result before drawing operational conclusions.
