@@ -18,3 +18,12 @@
 
 ## Limitations
 Automated tests cover the local synthetic dataset and calculations. They do not prove a live Birst dashboard exists or that a Birst space has been deployed.
+
+
+## Executed validation in this portfolio package
+
+- Python data validation: unique fact grain, valid dimension keys, nonnegative/present amounts and complete 12-month coverage.
+- Financial reconciliation: actual/budget totals and operating profit formula reconcile by month.
+- SQL smoke tests: monthly revenue, department operating-profit variance, expense variance and duplicate-grain queries are run against an in-memory database and compared with Python outputs. The production-facing schema and query files are written for PostgreSQL; SQLite is only a fast test fixture for the shared SQL constructs.
+- Dashboard regression: all KPI cards are compared with generated CSV values; four embedded SVG charts are checked against output data; no runtime CSV/PNG fetches are permitted.
+- Browser smoke checks: standalone HTML rendered at 390×844 and 1365×900; no horizontal overflow, browser/console errors, or broken image assets detected.

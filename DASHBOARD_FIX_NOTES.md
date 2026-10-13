@@ -21,3 +21,12 @@ The old page requested KPI summaries from `outputs/*.csv` and four chart images 
 5. Open the site in a private tab or refresh after deployment. The executive cards should show `$38.97M`, `$9.84M`, `25.24%`, and `1,680`, with four chart panels visible.
 
 All financial values are synthetic portfolio data for 2025. The Birst section remains an implementation blueprint rather than a live deployment claim.
+
+## Senior QA improvements
+
+- `python/build_dashboard.py` regenerates the KPIs, insight text and embedded SVG charts from `outputs/*.csv` so the visuals stay tied to the analysis output.
+- The mobile variance charts align values in a dedicated value column so department/account labels do not collide with bar labels.
+- `tests/test_finance_project.py` checks data quality, KPI-to-output parity, chart-to-output parity, mobile CSS and deterministic dashboard rebuilds.
+- `tests/test_sql_queries.py` runs the SQL business questions and reconciles them to Python using an in-memory SQLite fixture.
+- `.github/workflows/ci.yml` runs the analysis, dashboard build and test suite on pushes and pull requests.
+- Current validation: 25 tests pass; Chromium smoke-tested at 390×844 and 1365×900 without horizontal overflow or browser errors.

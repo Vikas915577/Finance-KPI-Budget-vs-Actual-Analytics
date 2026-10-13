@@ -11,6 +11,16 @@
 2. **Diagnose — Where is the gap?** Department, region and account breakdowns; identify the largest variances and drill to the relevant account/period.
 3. **Decide — What should happen next?** Assign a variance owner, validate price/volume/timing/coding, agree a corrective action and due date, then monitor the next period. The data flags investigation priorities; it does not prove root cause by itself.
 
+## Dashboard preview
+
+The static dashboard is self-contained, with KPI cards and four data-derived SVG charts. The screenshots below were captured during mobile and desktop smoke testing.
+
+![Desktop executive snapshot](docs/screenshots/desktop-executive-snapshot.png)
+
+![Desktop variance-driver charts](docs/screenshots/desktop-variance-charts.png)
+
+[Open the mobile chart preview](docs/screenshots/mobile-variance-charts.png)
+
 ## Business user stories
 - **Finance Director:** As a Finance Director, I want actual vs budget revenue, operating profit and margin at a glance, so I can see whether the business is on plan and focus the monthly review.
 - **FP&A Analyst:** As an FP&A Analyst, I want to compare monthly trends and variance percentages, so I can spot when performance starts to diverge from plan.
@@ -45,6 +55,7 @@ Python 3.10+ recommended.
 ```bash
 python -m pip install -r requirements.txt
 python python/analyze_finance.py
+python python/build_dashboard.py
 python -m unittest discover -s tests -v
 ```
 
@@ -57,9 +68,11 @@ README.md                          # project overview and truthful disclosure
 data/synthetic/                    # fact and dimension CSVs
 sql/                               # schema, KPI queries, QA checks
 python/analyze_finance.py          # reproducible analysis and chart generation
+python/build_dashboard.py          # embed data-derived KPIs and SVG charts in index.html
+.github/workflows/ci.yml           # automated checks on push and pull request
 outputs/                           # generated results and four charts
 birst/                             # implementation blueprint and report catalogue
-docs/                              # user stories, definitions, decision log, QA plan
+docs/                              # user stories, definitions, decision log, QA plan and screenshots
 tests/                             # automated validation tests
 ```
 
