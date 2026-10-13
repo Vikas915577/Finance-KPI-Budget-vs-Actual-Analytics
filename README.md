@@ -37,7 +37,7 @@
 - **Infor Birst (planned implementation):** model/subject area, measures and attributes, Visualizer reports, dashboard filters, KPI tiles, dashboard publishing and validation.
 - **SQL:** finance KPI aggregation, variance breakdowns and quality/reconciliation checks.
 - **Python:** pandas/NumPy calculations, data-quality assertions, CSV outputs and Matplotlib charts.
-- **GitHub Pages:** responsive static portfolio overview; this is a presentation layer and is not a live Birst connection.
+- **GitHub Pages:** responsive, self-contained static portfolio dashboard with KPI figures and four inline SVG charts embedded in `index.html`; the page does not fetch chart images or CSV files at runtime. It is a presentation layer, not a live Birst connection.
 
 ## Run locally
 Python 3.10+ recommended.
@@ -52,7 +52,7 @@ Outputs are written to `outputs/`, including KPI CSVs, department/region/account
 
 ## Project structure
 ```text
-index.html                         # responsive DDD portfolio landing page
+index.html                         # self-contained responsive DDD dashboard; inline KPI values and four SVG charts
 README.md                          # project overview and truthful disclosure
 data/synthetic/                    # fact and dimension CSVs
 sql/                               # schema, KPI queries, QA checks

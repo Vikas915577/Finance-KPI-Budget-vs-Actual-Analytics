@@ -32,4 +32,23 @@ class FinanceAnalyticsTests(unittest.TestCase):
     def test_account_classification(self):
         self.assertEqual(set(self.account.account_type),{"Revenue","COGS","Operating Expense"})
 
+
+class DashboardStaticTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.html = (ROOT / "index.html").read_text(encoding="utf-8")
+
+    def test_four_charts_are_embedded(self):
+        self.assertEqual(self.html.count("<svg"), 4)
+
+    def test_dashboard_does_not_fetch_missing_assets(self):
+        self.assertNotIn("fetch(", self.html)
+        self.assertNotIn("outputs/charts/", self.html)
+        self.assertNotIn("Loading data…", self.html)
+
+    def test_executive_kpis_are_present_without_runtime_csv(self):
+        for value in ("$38.97M", "$9.84M", "25.24%", "1,680"):
+            self.assertIn(value, self.html)
+
+
 if __name__=="__main__": unittest.main()

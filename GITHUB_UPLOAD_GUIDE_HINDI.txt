@@ -1,17 +1,21 @@
-GITHUB PAGES PAR UPLOAD KARNE KE STEPS
+GITHUB PAGES DASHBOARD FIX — UPLOAD GUIDE
 
-1. ZIP ko extract karein.
-2. Extracted folder ke ANDAR ka content repository ke root mein upload karein (poora folder ek extra nested folder ke andar na daalein).
+SHORT FIX (sirf dashboard):
+1. Is ZIP se index.html nikal kar GitHub repo ki existing root index.html ko replace karein.
+2. Existing index.html par Edit (pencil) dabayein; fixed index.html ka pura content paste karein.
+3. Commit changes karein. GitHub Pages deployment complete hone dein.
+4. Site ko Chrome Incognito/private tab mein khol kar check karein. KPI cards mein $38.97M, $9.84M, 25.24% aur 1,680 dikhna chahiye. Chaar charts bhi show hone chahiye.
+
+FULL PROJECT UPLOAD:
+1. ZIP extract karein.
+2. Extracted Finance-KPI-Analytics-Professional folder KE ANDAR ka saara content repository ke root mein upload karein; extra nested folder na banayein.
 3. Ensure karein ki index.html repository ke root mein hai.
-4. Existing repo ke purane project files ko delete karne se pehle compare karein; is ZIP mein project ki complete file structure included hai.
-5. GitHub > Settings > Pages mein main branch aur /(root) source select karein (agar GitHub Pages use kar rahe hain).
-6. Actions tab mein deployment successful hone ka wait karein.
-7. Site ko hard refresh/private tab mein khol kar check karein.
-8. Agar GitHub integration direct write block kare, to browser se files upload/replace karke commit karein. Is environment se repository par direct push ki guarantee nahi hai.
+4. Settings > Pages mein main branch aur /(root) select karein. Deployment successful hone ke baad private tab mein test karein.
+5. Existing files delete karne se pehle compare karein.
 
-Local test:
+LOCAL TEST:
 python -m pip install -r requirements.txt
 python python/analyze_finance.py
 python -m unittest discover -s tests -v
 
-Important: Infor Birst dashboard blueprint diya gaya hai. Actual Birst deployment ka claim tabhi karein jab apne Birst practice space mein build aur reconcile kar lein.
+Important: dashboard figures are synthetic. Birst blueprint included hai, live Birst deployment claim nahi kiya gaya.
